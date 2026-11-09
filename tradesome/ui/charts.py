@@ -204,21 +204,114 @@ class LineChart(_ChartBase):
 
 
 class CandlestickChart(_ChartBase):
+    """K 线图：滚轮缩放、拖动平移。X 轴取可见区间，Y 轴随可见高低点自适应。"""
+
+    MIN_BARS = 8
+
     def __init__(self, parent, height: int = 330, **kwargs) -> None:
         super().__init__(parent, height=height, padding=(12, 12, 58, 26), **kwargs)
         self.bars: List[Bar] = []
         self.ma_periods = (5, 20)
         self._ma_lines: List[List[float]] = []
         self.show_volume = True
+        self._start = 0
+        self._end = 0
+        self._drag_x: Optional[int] = None
         self.bind("<Motion>", self._on_motion)
         self.bind("<Leave>", lambda e: self.delete("crosshair"))
+        self.bind("<MouseWheel>", self._on_wheel)
+        self.bind("<Button-4>", lambda e: self._wheel_step(1))
+        self.bind("<Button-5>", lambda e: self._wheel_step(-1))
+        self.bind("<ButtonPress-1>", self._on_press)
+        self.bind("<B1-Motion>", self._on_drag)
+        self.bind("<ButtonRelease-1>", self._on_release)
+        self.bind("<Double-Button-1>", lambda e: self.reset_zoom())
 
+    # ------------------------------------------------------------ 数据与视图
     def set_bars(self, bars: Sequence[Bar]) -> None:
         self.bars = list(bars or [])
         closes = [b.close for b in self.bars]
         self._ma_lines = [sma(closes, period) for period in self.ma_periods]
+        self._start = 0
+        self._end = len(self.bars)
         self._schedule()
 
+    def reset_zoom(self) -> None:
+        self._start = 0
+        self._end = len(self.bars)
+        self._schedule()
+
+    def view_range(self) -> Tuple[int, int]:
+        return self._start, self._end
+
+    def zoom_at(self, ratio: float, factor: float) -> None:
+        n = len(self.bars)
+        if n <= self.MIN_BARS:
+            return
+        count = max(self.MIN_BARS, self._end - self._start)
+        new_count = max(self.MIN_BARS, min(n, int(round(count * factor))))
+        ratio = min(1.0, max(0.0, ratio))
+        anchor = self._start + ratio * count
+        new_start = int(round(anchor - ratio * new_count))
+        new_start = max(0, min(n - new_count, new_start))
+        self._start = new_start
+        self._end = new_start + new_count
+        self._schedule()
+
+    def pan(self, bars_delta: int) -> None:
+        n = len(self.bars)
+        count = self._end - self._start
+        if n <= count or count <= 0:
+            return
+        new_start = max(0, min(n - count, self._start + int(bars_delta)))
+        if new_start != self._start:
+            self._start = new_start
+            self._end = new_start + count
+            self._schedule()
+
+    # ------------------------------------------------------------ 交互
+    def _wheel_step(self, direction: int) -> str:
+        self.zoom_at(0.5, 0.8 if direction > 0 else 1.25)
+        return "break"
+
+    def _on_wheel(self, event) -> str:
+        if not self.bars:
+            return "break"
+        left, _top, right, _bottom = self._plot_box()
+        if not (left <= event.x <= right):
+            return "break"
+        ratio = (event.x - left) / max(1, right - left)
+        delta = getattr(event, "delta", 0)
+        self.zoom_at(ratio, 0.8 if delta > 0 else 1.25)
+        self._on_motion(event)
+        return "break"
+
+    def _on_press(self, event) -> None:
+        self._drag_x = event.x
+        try:
+            self.configure(cursor="fleur")
+        except tk.TclError:
+            pass
+
+    def _on_drag(self, event) -> None:
+        if self._drag_x is None or not self.bars:
+            return
+        left, _top, right, _bottom = self._plot_box()
+        slot = max(1e-6, (right - left) / max(1, self._end - self._start))
+        delta = int(round((self._drag_x - event.x) / slot))
+        if delta:
+            self.pan(delta)
+            self._drag_x = event.x
+
+    def _on_release(self, _event) -> None:
+        self._drag_x = None
+        try:
+            self.configure(cursor="")
+        except tk.TclError:
+            pass
+        self._schedule()
+
+    # ------------------------------------------------------------ 绘制
     def _draw(self) -> None:
         self.delete("all")
         left, top, right, bottom = self._plot_box()
@@ -226,12 +319,23 @@ class CandlestickChart(_ChartBase):
         if not self.bars or width < 20:
             self._empty("选择左侧标的查看 K 线")
             return
+        n = len(self.bars)
+        self._start = max(0, min(self._start, n - self.MIN_BARS))
+        self._end = max(self._start + self.MIN_BARS, min(n, self._end))
+        start, end = self._start, self._end
+        bars = self.bars[start:end]
+        count = len(bars)
         price_bottom = bottom if not self.show_volume else bottom - max(34, (bottom - top) * 0.18)
         volume_top = price_bottom + 12
-        n = len(self.bars)
-        lows = [b.low for b in self.bars]
-        highs = [b.high for b in self.bars]
-        low, high = min(lows), max(highs)
+        low = min(b.low for b in bars)
+        high = max(b.high for b in bars)
+        for positions in self._ma_lines:
+            for index in range(start, end):
+                value = positions[index]
+                if value is None or (isinstance(value, float) and math.isnan(value)):
+                    continue
+                low = min(low, value)
+                high = max(high, value)
         if high - low < 1e-6:
             high = low + 1.0
         pad = (high - low) * 0.06
@@ -250,27 +354,23 @@ class CandlestickChart(_ChartBase):
                              fill=theme.color("faint"), font=theme.font("small"))
         self.create_rectangle(left, top, right, price_bottom, outline="")
 
-        slot = width / n
-        candle = max(1.5, min(9.0, slot * 0.62))
-        max_volume = max((b.volume for b in self.bars), default=0) or 1.0
+        slot = width / count
+        candle = max(1.5, min(11.0, slot * 0.62))
+        max_volume = max((b.volume for b in bars), default=0) or 1.0
 
         def y_of(price: float) -> float:
             return price_bottom - (price - low) / span * height
 
-        for index, bar in enumerate(self.bars):
-            x = left + slot * (index + 0.5)
+        for offset, bar in enumerate(bars):
+            x = left + slot * (offset + 0.5)
             color = theme.color("up") if bar.close >= bar.open else theme.color("down")
             self.create_line(x, y_of(bar.high), x, y_of(bar.low), fill=color, width=1)
             top_body = y_of(max(bar.open, bar.close))
             bottom_body = y_of(min(bar.open, bar.close))
             if bottom_body - top_body < 1:
                 bottom_body = top_body + 1
-            if bar.close >= bar.open:
-                self.create_rectangle(x - candle / 2, top_body, x + candle / 2,
-                                      bottom_body, fill=color, outline=color)
-            else:
-                self.create_rectangle(x - candle / 2, top_body, x + candle / 2,
-                                      bottom_body, fill=color, outline=color)
+            self.create_rectangle(x - candle / 2, top_body, x + candle / 2,
+                                  bottom_body, fill=color, outline=color)
             if self.show_volume:
                 volume_height = (bar.volume / max_volume) * (bottom - volume_top)
                 self.create_rectangle(x - candle / 2, bottom - volume_height,
@@ -280,10 +380,11 @@ class CandlestickChart(_ChartBase):
         for positions, period, key in zip(self._ma_lines, self.ma_periods,
                                           ("ma5", "ma20")):
             points: List[float] = []
-            for index, value in enumerate(positions):
+            for index in range(start, end):
+                value = positions[index]
                 if value is None or (isinstance(value, float) and math.isnan(value)):
                     continue
-                x = left + slot * (index + 0.5)
+                x = left + slot * (index - start + 0.5)
                 points.extend([x, y_of(value)])
             if len(points) >= 4:
                 self.create_line(points, fill=theme.color(key), width=1.2)
@@ -291,12 +392,16 @@ class CandlestickChart(_ChartBase):
         if self.show_volume:
             self.create_line(left, volume_top - 6, right, volume_top - 6,
                              fill=theme.color("chart_grid"), dash=(2, 4))
-        indices = sorted({int((n - 1) * i / 3) for i in range(4)})
-        for j, index in enumerate(indices):
-            bar = self.bars[index]
-            x = left + slot * (index + 0.5)
-            anchor = "nw" if j == 0 else "ne" if j == len(indices) - 1 else "n"
-            if len(indices) == 1:
+        self.create_text(left + 2, top + 6,
+                         text="滚轮缩放 · 拖动平移 · 双击重置（%d 根）" % count,
+                         anchor="nw", fill=theme.color("faint"),
+                         font=theme.font("small"))
+        positions_x = sorted({int((count - 1) * i / 3) for i in range(4)})
+        for j, offset in enumerate(positions_x):
+            bar = bars[offset]
+            x = left + slot * (offset + 0.5)
+            anchor = "nw" if j == 0 else "ne" if j == len(positions_x) - 1 else "n"
+            if len(positions_x) == 1:
                 anchor = "n"
             self.create_text(x, bottom + 8, text=bar.dt.strftime("%Y-%m-%d"),
                              anchor=anchor, fill=theme.color("faint"),
@@ -319,12 +424,12 @@ class CandlestickChart(_ChartBase):
         if not (left <= event.x <= right):
             self.delete("crosshair")
             return
-        n = len(self.bars)
-        slot = (right - left) / n
-        index = max(0, min(n - 1, int((event.x - left) / max(slot, 1e-6))))
-        bar = self.bars[index]
+        count = max(1, self._end - self._start)
+        slot = (right - left) / count
+        offset = max(0, min(count - 1, int((event.x - left) / max(slot, 1e-6))))
+        bar = self.bars[self._start + offset]
         self.delete("crosshair")
-        x = left + slot * (index + 0.5)
+        x = left + slot * (offset + 0.5)
         self.create_line(x, top, x, bottom, fill=theme.color("border"),
                          dash=(2, 3), tags="crosshair")
         lines = [
@@ -334,8 +439,8 @@ class CandlestickChart(_ChartBase):
             "量 %s" % _volume_text(bar.volume),
         ]
         anchor = "nw" if x < (left + right) / 2 else "ne"
-        offset = 12 if anchor == "nw" else -12
-        text = self.create_text(x + offset, top + 8, text="\n".join(lines),
+        offset_px = 12 if anchor == "nw" else -12
+        text = self.create_text(x + offset_px, top + 8, text="\n".join(lines),
                                 anchor=anchor, justify="left",
                                 fill=theme.color("text"), font=theme.font("small"),
                                 tags="crosshair")

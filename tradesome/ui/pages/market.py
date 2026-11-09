@@ -79,6 +79,16 @@ class MarketPage(BasePage):
         self.chart = CandlestickChart(right.body, height=322)
         self.chart.pack(fill="both", expand=True, pady=(theme.px(10), theme.px(6)))
 
+        Button(header_row, "重置", command=lambda: self.chart.reset_zoom(),
+               variant="ghost", size="sm", width=44).pack(side="right",
+                                                          padx=(0, theme.px(4)))
+        Button(header_row, "－", command=lambda: self.chart.zoom_at(0.5, 1.25),
+               variant="ghost", size="sm", width=28).pack(side="right",
+                                                          padx=(0, theme.px(2)))
+        Button(header_row, "＋", command=lambda: self.chart.zoom_at(0.5, 0.8),
+               variant="ghost", size="sm", width=28).pack(side="right",
+                                                          padx=(0, theme.px(2)))
+
         stats_row = tk.Frame(right.body, bg=theme.color("surface"))
         stats_row.pack(fill="x", pady=(theme.px(4), 0))
         stats = tk.Frame(stats_row, bg=theme.color("surface"))

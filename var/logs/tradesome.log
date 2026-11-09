@@ -377,3 +377,22 @@ TypeError: 'float' object is not subscriptable
 2026-11-10 01:18:21.038 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
 2026-11-10 01:18:21.055 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
 2026-11-10 01:18:21.098 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 01:32:57.144 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 01:32:57.196 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 01:32:57.210 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 01:32:57.222 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 01:32:57.612 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 01:32:57.624 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 01:32:57.682 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 01:33:14.009 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 01:33:14.069 INFO    tradesome.app.backtest 回测完成 BT-20261110-UZU1AU，用时 0.03s
+2026-11-10 01:33:14.831 INFO    tradesome.app.backtest 回测完成 BT-20261110-BK9M8A，用时 0.09s
+2026-11-10 01:33:20.797 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 01:36:35.026 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 01:36:35.072 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 01:36:35.088 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 01:36:35.098 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 01:36:35.526 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 01:36:35.538 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 01:36:35.581 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 01:36:51.002 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根

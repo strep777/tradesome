@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import threading
 import tkinter as tk
+from datetime import date, timedelta
 from tkinter import ttk
 
 from .. import theme
@@ -12,6 +14,8 @@ from .. import formatting as fmt
 from .base import BasePage
 
 TIMEFRAME_LABELS = [("日线", "1d"), ("周线", "1w"), ("月线", "1M")]
+RANGE_LABELS = [("近 3 年", "3y"), ("近 1 年", "1y"),
+                ("近 5 年", "5y"), ("全部历史", "all")]
 
 
 class MarketPage(BasePage):
@@ -19,9 +23,9 @@ class MarketPage(BasePage):
     subtitle = "选择标的查看走势；周线、月线由日线聚合，不会产生未来数据。"
 
     help_steps = [
-        '左侧列表选一个标的，右侧显示 K 线与成交量。',
+        '左侧列表选一个标的，右侧显示 K 线与成交量；只有当日快照时会自动补齐历史日线。',
         '周期可切日 / 周 / 月，聚合不会产生未来数据。',
-        '没有数据时去数据中心「同步真实行情」或导入 CSV；也可以直接「用该标的回测」。',
+        '补齐失败可点图表右上「补齐历史」重试；也可以在数据中心批量同步或导入 CSV。',
     ]
 
     def tour_targets(self) -> dict:
@@ -29,7 +33,12 @@ class MarketPage(BasePage):
 
     def build(self) -> None:
         self._symbol = None
+        self._changes = {}
         self._bars = []
+        self._hist_loading = set()
+        self._hist_failed = {}
+        self._hist_result = {}
+        self._suppress_select = False
         header = self.page_header()
         self._build_toolbar(header)
 
@@ -62,6 +71,9 @@ class MarketPage(BasePage):
         self.change_label = tk.Label(header_row, text="", bg=theme.color("surface"),
                                      fg=theme.color("muted"), font=theme.font("caption"))
         self.change_label.pack(side="right", padx=(0, theme.px(10)))
+        self.history_button = Button(header_row, "补齐历史", command=self._retry_history,
+                                     variant="ghost", size="sm")
+        self.history_button.pack(side="right", padx=(0, theme.px(8)))
 
         from ..charts import CandlestickChart
         self.chart = CandlestickChart(right.body, height=322)
@@ -103,6 +115,12 @@ class MarketPage(BasePage):
                              width=6, font=theme.font("body"))
         combo.pack(side="left", padx=(0, theme.px(8)))
         combo.bind("<<ComboboxSelected>>", lambda e: self._load_chart())
+        self.range_var = tk.StringVar(value="近 3 年")
+        range_combo = ttk.Combobox(bar, textvariable=self.range_var, state="readonly",
+                                   values=[label for label, _ in RANGE_LABELS],
+                                   width=9, font=theme.font("body"))
+        range_combo.pack(side="left", padx=(0, theme.px(8)))
+        range_combo.bind("<<ComboboxSelected>>", lambda e: self._load_chart())
         Button(bar, "刷新", command=self.refresh, variant="ghost", size="sm").pack(
             side="left", padx=(0, theme.px(6)))
         Button(bar, "同步真实行情", command=lambda: self.shell.navigate("data"),
@@ -113,11 +131,15 @@ class MarketPage(BasePage):
     def refresh(self) -> None:
         self._refresh_quotes()
         self._load_chart()
+        self._ensure_history()
 
     def _refresh_quotes(self) -> None:
         keyword = (self.search_var.get() or "").strip().lower()
+        self._changes = {}
         rows = []
         for quote in self.c.services.market.quotes():
+            if quote["has_data"]:
+                self._changes[quote["symbol"]] = quote["change_pct"]
             if keyword and keyword not in quote["symbol"].lower() \
                     and keyword not in (quote["name"] or "").lower():
                 continue
@@ -131,30 +153,108 @@ class MarketPage(BasePage):
                 "tone": quote["change_pct"] if quote["has_data"] else None,
             })
         self.table.set_rows_colored(rows, tone_key="tone")
-        if self._symbol is None and rows:
-            row = self.table.select_first()
-            if row:
-                self._symbol = row["symbol"]
+        self._suppress_select = True
+        try:
+            if self._symbol:
+                self.table.select_value("symbol", self._symbol)
+            if self._symbol is None and rows:
+                row = self.table.select_first()
+                if row:
+                    self._symbol = row["symbol"]
+        finally:
+            self._suppress_select = False
 
     def _timeframe(self) -> str:
         return dict(TIMEFRAME_LABELS).get(self.tf_var.get(), "1d")
 
     def _on_select(self, row) -> None:
+        if self._suppress_select:
+            return
         if row and row.get("symbol"):
             self._symbol = row["symbol"]
             self._load_chart()
+            self._ensure_history()
+
+    # ---------------------------------------------------------- 历史日线
+    def _ensure_history(self, force: bool = False) -> None:
+        """只有当日快照时，后台补齐该股全部历史日线。"""
+        symbol = self._symbol
+        if not symbol or symbol in self._hist_loading:
+            return
+        if not force and symbol in self._hist_failed:
+            return
+        try:
+            bars = self.c.services.market.history(symbol, "1d")
+        except Exception:  # noqa: BLE001 - 图表不应因读库失败而崩
+            bars = []
+        if not force and len(bars) > 2:
+            return
+        self._hist_loading.add(symbol)
+        self._hist_failed.pop(symbol, None)
+        self.change_label.configure(text="正在补齐该股历史日线…", fg=theme.color("muted"))
+        worker = threading.Thread(target=self._history_worker, args=(symbol,),
+                                  daemon=True, name="history-%s" % symbol)
+        worker.start()
+        self.after(350, self._poll_history, symbol, worker)
+
+    def _history_worker(self, symbol: str) -> None:
+        today = date.today().strftime("%Y-%m-%d")
+        try:
+            result = self.c.services.market.sync_akshare(
+                [symbol], start="1990-01-01", end=today, adjust="qfq", timeout=180)
+        except Exception as exc:  # noqa: BLE001 - 线程内异常要转成结果
+            result = {"ok": False, "errors": [str(exc)], "symbols": 0, "bars": 0}
+        self._hist_result[symbol] = result
+
+    def _poll_history(self, symbol: str, worker) -> None:
+        if worker.is_alive():
+            self.after(350, self._poll_history, symbol, worker)
+            return
+        try:
+            self._hist_loading.discard(symbol)
+            result = self._hist_result.pop(symbol, {}) or {}
+            ok = int(result.get("bars") or 0) > 0
+            if ok:
+                self.refresh()
+                if self._symbol == symbol:
+                    self._load_chart()
+                self.toast("已补齐 %s 的历史日线（%d 根）" % (symbol, result.get("bars", 0)),
+                           "success")
+            else:
+                reason = (result.get("errors") or ["未知原因"])[0]
+                self._hist_failed[symbol] = reason
+                if self._symbol == symbol:
+                    self.change_label.configure(
+                        text="历史日线不可用：%s" % str(reason)[:60],
+                        fg=theme.color("warning"))
+                self.toast("补齐 %s 历史日线失败：%s" % (symbol, str(reason)[:60]), "error")
+        finally:
+            self._hist_loading.discard(symbol)
+
+    def _retry_history(self) -> None:
+        if not self._symbol:
+            return
+        self._ensure_history(force=True)
 
     def _load_chart(self) -> None:
         symbol = self._symbol
         if not symbol:
             return
+        names = self.c.services.market.names()
         instrument = self.c.instruments.get(symbol)
-        self.name_label.configure(text="%s  %s" % (symbol, instrument.name if instrument else ""))
+        display_name = (names.get(symbol)
+                        or (instrument.name if instrument else "")
+                        or "")
+        self.name_label.configure(text="%s  %s" % (symbol, display_name))
         timeframe = self._timeframe()
         bars = self.c.services.market.history(symbol, "1d")
+        span = dict(RANGE_LABELS).get(self.range_var.get(), "3y")
+        years = {"1y": 1, "3y": 3, "5y": 5}.get(span)
+        if years and bars:
+            cutoff = bars[-1].dt - timedelta(days=365 * years)
+            bars = [bar for bar in bars if bar.dt >= cutoff]
         if timeframe != "1d" and bars:
             bars = resample(bars, timeframe)
-        bars = bars[-260:]
         self._bars = bars
         if not bars:
             self.chart.set_bars([])
@@ -165,7 +265,8 @@ class MarketPage(BasePage):
             return
         latest = bars[-1]
         previous = bars[-2] if len(bars) > 1 else None
-        change = (latest.close / previous.close - 1.0) if previous else 0.0
+        change = (latest.close / previous.close - 1.0) if previous else float(
+            self._changes.get(symbol, 0.0))
         tone = "up" if change > 0 else "down" if change < 0 else "muted"
         self.price_label.configure(text=fmt.money(latest.close),
                                    fg=theme.color(tone))

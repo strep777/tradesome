@@ -41,7 +41,12 @@ class MarketService:
     # ---------------------------------------------------------- 行情列表
 
     def quotes(self) -> List[dict]:
+        names = self.names()
+        snapshot = self.c.repos.kv.get("market.snapshot", {})
+        if not isinstance(snapshot, dict):
+            snapshot = {}
         rows: List[dict] = []
+        seen = set()
         for instrument in self.c.instruments.tradable():
             bars = self.repo.get_bars(instrument.symbol, "1d", limit=2)
             latest = bars[-1] if bars else None
@@ -49,15 +54,135 @@ class MarketService:
             change = 0.0
             if latest and previous and previous.close > 0:
                 change = latest.close / previous.close - 1.0
+            elif latest:
+                change = float(snapshot.get(instrument.symbol, {}).get("change_pct") or 0.0)
             rows.append({
-                "symbol": instrument.symbol, "name": instrument.name,
+                "symbol": instrument.symbol,
+                "name": names.get(instrument.symbol, instrument.name),
                 "kind": instrument.kind, "price": latest.close if latest else None,
+                "change_pct": change, "dt": latest.dt if latest else None,
+                "volume": latest.volume if latest else 0,
+                "has_data": latest is not None,
+            })
+            seen.add(instrument.symbol)
+        for item in self.repo.symbols():
+            symbol = item["symbol"]
+            if symbol in seen:
+                continue
+            bars = self.repo.get_bars(symbol, "1d", limit=2)
+            latest = bars[-1] if bars else None
+            previous = bars[-2] if len(bars) > 1 else None
+            change = 0.0
+            if latest and previous and previous.close > 0:
+                change = latest.close / previous.close - 1.0
+            elif latest:
+                change = float(snapshot.get(symbol, {}).get("change_pct") or 0.0)
+            rows.append({
+                "symbol": symbol, "name": names.get(symbol, symbol),
+                "kind": "STOCK", "price": latest.close if latest else None,
                 "change_pct": change, "dt": latest.dt if latest else None,
                 "volume": latest.volume if latest else 0,
                 "has_data": latest is not None,
             })
         rows.sort(key=lambda r: (not r["has_data"], r["symbol"]))
         return rows
+
+    @staticmethod
+    def _symbol_from_code(code: str) -> str:
+        code = str(code).strip()
+        if code.startswith(("6", "9")):
+            return code + ".SH"
+        if code.startswith(("0", "2", "3")):
+            return code + ".SZ"
+        return code + ".BJ"
+
+    def names(self) -> Dict[str, str]:
+        data = self.c.repos.kv.get("market.names", {})
+        return data if isinstance(data, dict) else {}
+
+    def sync_a_share_list(self, timeout: int = 300) -> dict:
+        """抓取全部 A 股当日快照，写入一根当日日线，并记住名称。
+
+        全市场约 5500 只、接口约 1 分钟。之后行情页会列出全部 A 股；
+        历史回测仍按需对单只标的 sync_akshare。
+        """
+        tool = self._tool_path
+        cmd = [sys.executable, str(tool), "--all"]
+        flags = getattr(subprocess, "CREATE_NO_WINDOW", 0) if os.name == "nt" else 0
+        try:
+            proc = subprocess.run(
+                cmd, cwd=str(tool.parent.parent), capture_output=True, text=True, encoding="utf-8", errors="replace",
+                timeout=timeout, env=self._pip_env(True), creationflags=flags)
+        except subprocess.TimeoutExpired:
+            return {"ok": False, "message": "抓取全部 A 股超时，请检查网络后重试。",
+                    "symbols": 0, "bars": 0}
+        payload = {}
+        for line in reversed((proc.stdout or "").splitlines()):
+            line = line.strip()
+            if line.startswith("{"):
+                try:
+                    payload = json.loads(line)
+                    break
+                except ValueError:
+                    continue
+        if not payload.get("ok"):
+            message = payload.get("error") or (proc.stderr or "").strip()[-200:]
+            return {"ok": False, "message": "抓取全部 A 股失败：%s" % message,
+                    "symbols": 0, "bars": 0}
+        path = Path(payload.get("file") or "")
+        if not path.is_file():
+            return {"ok": False, "message": "抓取结果文件不存在。",
+                    "symbols": 0, "bars": 0}
+
+        from datetime import time as _time
+        stamp = datetime.combine(datetime.now().date(), _time(15, 0))
+        names = self.names()
+        snapshot: Dict[str, dict] = {}
+        by_symbol: Dict[str, List[Bar]] = {}
+        errors: List[str] = []
+        with open(str(path), "r", encoding="utf-8-sig", newline="") as handle:
+            for row in csv.DictReader(handle):
+                code = (row.get("代码") or "").strip()
+                if len(code) != 6 or not code.isdigit():
+                    continue
+                symbol = self._symbol_from_code(code)
+                try:
+                    bar = Bar(symbol=symbol, dt=stamp,
+                              open=float(row.get("开盘") or 0),
+                              high=float(row.get("最高") or 0),
+                              low=float(row.get("最低") or 0),
+                              close=float(row.get("收盘") or 0),
+                              volume=int(float(row.get("成交量") or 0)),
+                              amount=float(row.get("成交额") or 0))
+                except Exception:  # noqa: BLE001 - 单行坏数据跳过
+                    errors.append(symbol)
+                    continue
+                if bar.close <= 0:
+                    continue
+                by_symbol[symbol] = [bar]
+                name = (row.get("名称") or "").strip()
+                if name:
+                    names[symbol] = name
+                try:
+                    change = float(row.get("涨跌幅") or 0.0) / 100.0
+                except (TypeError, ValueError):
+                    change = 0.0
+                snapshot[symbol] = {"name": name, "price": bar.close,
+                                    "change_pct": change}
+        if not by_symbol:
+            return {"ok": False, "message": "没有解析到任何 A 股数据。",
+                    "symbols": 0, "bars": 0}
+        for symbol, bars in by_symbol.items():
+            self.repo.upsert_bars(bars)
+        self.c.repos.kv.set("market.names", names)
+        self.c.repos.kv.set("market.snapshot", snapshot)
+        self.c.bus.emit(DATA_IMPORTED, symbols=len(by_symbol),
+                        source="akshare_spot")
+        self.c.repos.audit.write("data", "akshare_list", actor="user",
+                                 detail="%d 只" % len(by_symbol))
+        return {"ok": True, "symbols": len(by_symbol),
+                "bars": len(by_symbol), "errors": len(errors),
+                "message": "已同步 %d 只 A 股当日快照。" % len(by_symbol)}
 
     def universe(self) -> List[dict]:
         out = []
@@ -84,9 +209,12 @@ class MarketService:
 
     def coverage(self) -> List[dict]:
         rows = self.repo.symbols()
+        names = self.names()
         for row in rows:
             inst = self.c.instruments.get(row["symbol"])
-            row["name"] = inst.name if inst else row["symbol"]
+            row["name"] = (names.get(row["symbol"])
+                           or (inst.name if inst is not None else "")
+                           or row["symbol"])
         return rows
 
     def summary(self) -> dict:
@@ -155,10 +283,16 @@ class MarketService:
     def _vendor_dir(self) -> Path:
         return Path(__file__).resolve().parents[3] / "vendor" / "akshare"
 
-    @staticmethod
-    def akshare_installed() -> bool:
+    def akshare_installed(self) -> bool:
+        import importlib
         import importlib.util
 
+        site = self._site_dir
+        if site.is_dir() and str(site) not in sys.path:
+            # 首次自动安装是在本进程内完成的，必须立刻把 vendor/site
+            # 加进 sys.path，否则“装好了但导入不到”，要重启才生效。
+            sys.path.insert(0, str(site))
+        importlib.invalidate_caches()
         try:
             return importlib.util.find_spec("akshare") is not None
         except (ImportError, ValueError):
@@ -226,10 +360,18 @@ class MarketService:
                 return False
         return True
 
+    @property
+    def _site_dir(self) -> Path:
+        """软件自带的第三方包目录，避免依赖系统 Python 的写入权限。"""
+        return self._vendor_dir.parent / "site"
+
     def _install_command(self, wheels: List[Path], direct: bool = False) -> List[str]:
+        site = self._site_dir
+        site.mkdir(parents=True, exist_ok=True)
         cmd = [sys.executable, "-m", "pip", "install",
                "--disable-pip-version-check", "--no-input",
-               "--progress-bar", "off", "--timeout", "20", "--retries", "1"]
+               "--progress-bar", "off", "--timeout", "20", "--retries", "1",
+               "--no-cache-dir", "--upgrade", "--target", str(site)]
         if direct:
             # 显式空代理：Windows 会从注册表读系统代理，仅清环境变量不够
             cmd += ["--proxy", ""]
@@ -238,6 +380,10 @@ class MarketService:
             # 缺依赖时 pip 仍可联网补齐，不会被一个 wheel 卡死。
             cmd += ["--find-links", str(self._vendor_dir)]
         cmd.append(AKSHARE_REQUIREMENT)
+        if sys.version_info < (3, 10):
+            # akshare 1.18.88 要求 pandas>=2；为 3.9 固定一组有 wheel 的版本，
+            # 避免 pip 在 pandas/numpy 的版本矩阵里长时间回溯。
+            cmd += ["pandas==2.0.3", "numpy==1.24.4"]
         return cmd
 
     @staticmethod
@@ -287,9 +433,10 @@ class MarketService:
             label = "直连" if direct else "代理"
             cmd = self._install_command(wheels, direct=direct)
             try:
-                proc = subprocess.run(cmd, capture_output=True, text=True,
-                                      encoding="utf-8", errors="replace",
-                                      timeout=budget, cwd=str(root),
+                proc = subprocess.run(
+                    cmd, capture_output=True, text=True,
+                    encoding="utf-8", errors="replace",
+                    timeout=budget, cwd=str(root),
                                       env=self._pip_env(direct),
                                       creationflags=flags)
             except subprocess.TimeoutExpired as exc:
@@ -363,7 +510,8 @@ class MarketService:
         try:
             proc = subprocess.run(
                 [sys.executable, str(tool), "--check"],
-                capture_output=True, text=True, encoding="utf-8", errors="replace",
+                capture_output=True, text=True,
+                encoding="utf-8", errors="replace",
                 timeout=60, cwd=str(tool.parent.parent))
         except subprocess.TimeoutExpired:
             return {"available": False, "message": "检查 akshare 超时"}
@@ -392,8 +540,9 @@ class MarketService:
                     else str(end)]
         try:
             proc = subprocess.run(
-                cmd, capture_output=True, text=True, encoding="utf-8",
-                errors="replace", timeout=timeout, cwd=str(tool.parent.parent))
+                cmd, capture_output=True, text=True,
+                encoding="utf-8", errors="replace",
+                timeout=timeout, cwd=str(tool.parent.parent))
         except subprocess.TimeoutExpired as exc:
             raise DataError("同步超时（%d 秒）。请缩小日期区间或标的数量后重试。" % timeout) from exc
 
@@ -465,6 +614,11 @@ class MarketService:
         fills = self.c.repos.fills.clear()
         equity = self.c.repos.equity.clear()
         sessions = self.c.repos.sessions.clear()
+        for key in ("market.names", "market.snapshot"):
+            try:
+                self.c.repos.kv.delete(key)
+            except Exception:  # noqa: BLE001 - 旧库没有该键
+                pass
         self.c.bus.emit(DATA_DELETED, symbol="*", bars=bars)
         self.c.repos.audit.write(
             "data", "purge",

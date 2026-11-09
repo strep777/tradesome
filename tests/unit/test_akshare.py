@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 import tempfile
@@ -129,7 +130,12 @@ class InstallServiceTest(unittest.TestCase):
         cmd = run.call_args[0][0]
         self.assertEqual(cmd[:4], [sys.executable, "-m", "pip", "install"])
         self.assertIn("akshare==1.18.88", cmd)
+        self.assertIn("--target", cmd)
+        self.assertIn("--no-cache-dir", cmd)
         self.assertNotIn("--no-index", cmd)
+        if sys.version_info < (3, 10):
+            self.assertIn("pandas==2.0.3", cmd)
+            self.assertIn("numpy==1.24.4", cmd)
 
     def test_install_uses_compatible_vendor_wheels(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -207,3 +213,62 @@ class DefaultConfigTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AllShareTest(unittest.TestCase):
+    """全市场快照：CSV 解析、代码后缀映射、行情合并。"""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self._tmp.name)
+        self.c = build_container(root=self.root, memory_db=True,
+                                 with_demo=False)
+        self.addCleanup(self._tmp.cleanup)
+        self.addCleanup(shutdown, self.c)
+        from tests.logging_utils import close_log_handlers
+        self.addCleanup(close_log_handlers)
+
+    def _csv(self):
+        path = self.root / "spot.csv"
+        path.write_text(
+            "代码,名称,日期,开盘,最高,最低,收盘,成交量,成交额,涨跌幅\n"
+            "600000,浦发银行,2026-11-10,10,10.5,9.8,10.2,1000,10000,1.5\n"
+            "000001,平安银行,2026-11-10,11,11.5,10.9,11.4,2000,20000,-0.5\n"
+            "830799,艾融软件,2026-11-10,5,5.5,4.9,5.2,300,3000,2.0\n"
+            "000002,坏行,2026-11-10,0,0,0,0,0,0,0\n",
+            encoding="utf-8-sig")
+        return path
+
+    def test_symbol_suffix(self):
+        svc = self.c.services.market
+        self.assertEqual(svc._symbol_from_code("600000"), "600000.SH")
+        self.assertEqual(svc._symbol_from_code("000001"), "000001.SZ")
+        self.assertEqual(svc._symbol_from_code("300750"), "300750.SZ")
+        self.assertEqual(svc._symbol_from_code("830799"), "830799.BJ")
+
+    def test_sync_all_merges_into_quotes(self):
+        path = self._csv()
+        stdout = "log\n" + json.dumps({"ok": True, "rows": 3, "file": str(path)})
+        fake = mock.Mock(returncode=0, stdout=stdout, stderr="")
+        with mock.patch("tradesome.app.services.market_service.subprocess.run",
+                        return_value=fake):
+            result = self.c.services.market.sync_a_share_list()
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["symbols"], 3)
+        quotes = {q["symbol"]: q for q in self.c.services.market.quotes()}
+        self.assertIn("600000.SH", quotes)
+        self.assertEqual(quotes["000001.SZ"]["name"], "平安银行")
+        self.assertAlmostEqual(quotes["000001.SZ"]["change_pct"], -0.005)
+        self.assertAlmostEqual(quotes["600000.SH"]["price"], 10.2)
+        self.assertEqual(self.c.services.market.names()["830799.BJ"], "艾融软件")
+        coverage = {r["symbol"]: r for r in self.c.services.market.coverage()}
+        self.assertEqual(coverage["000001.SZ"]["name"], "平安银行")
+
+    def test_sync_all_reports_failure(self):
+        fake = mock.Mock(returncode=1, stdout='{"ok": false, "error": "网络中断"}',
+                         stderr="")
+        with mock.patch("tradesome.app.services.market_service.subprocess.run",
+                        return_value=fake):
+            result = self.c.services.market.sync_a_share_list()
+        self.assertFalse(result["ok"])
+        self.assertIn("网络中断", result["message"])

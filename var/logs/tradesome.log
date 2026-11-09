@@ -245,3 +245,135 @@ TypeError: 'float' object is not subscriptable
 2026-11-09 23:15:57.483 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
 2026-11-09 23:15:57.493 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
 2026-11-09 23:15:57.558 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 00:21:34.339 INFO    tradesome.app.market akshare 同步：1 个标的 58 根
+2026-11-10 00:21:44.059 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 00:21:44.104 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 00:21:44.114 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 00:21:44.119 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 00:21:44.434 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 00:21:44.445 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 00:21:44.501 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 00:22:25.527 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 00:22:25.569 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 00:22:25.586 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 00:22:25.607 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 00:22:26.029 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 00:22:26.046 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 00:22:26.107 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 00:23:00.096 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 00:24:43.420 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 00:24:43.470 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 00:24:43.480 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 00:24:43.483 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 00:24:43.810 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 00:24:43.820 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 00:24:43.865 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 00:25:26.838 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 00:25:26.874 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 00:25:26.885 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 00:25:26.893 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 00:25:27.198 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 00:25:27.208 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 00:25:27.268 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 00:26:14.217 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 00:26:14.259 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 00:26:14.274 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 00:26:14.282 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 00:26:14.620 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 00:26:14.626 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 00:26:14.646 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 00:26:58.784 INFO    tradesome.app.market 清空数据：行情 9394 根，回测 0 次，会话 0 个
+2026-11-10 00:27:00.478 INFO    tradesome.app.market akshare 同步：1 个标的 58 根
+2026-11-10 00:27:21.301 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 00:27:21.317 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 00:27:21.333 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 00:27:21.337 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 00:27:21.659 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 00:27:21.672 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 00:27:21.724 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 00:27:59.036 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 00:27:59.094 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 00:27:59.104 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 00:27:59.114 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 00:27:59.444 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 00:27:59.454 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 00:27:59.524 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 00:28:54.508 INFO    tradesome.app.market akshare 同步：0 个标的 0 根
+2026-11-10 00:35:48.016 INFO    tradesome.app.market akshare 同步：0 个标的 0 根
+2026-11-10 00:51:31.642 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 00:51:31.691 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 00:51:31.697 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 00:51:31.706 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 00:51:32.029 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 00:51:32.040 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 00:51:32.099 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 00:52:06.916 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 00:52:06.980 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 00:52:06.991 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 00:52:07.001 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 00:52:07.442 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 00:52:07.463 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 00:52:07.522 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 00:52:48.980 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 00:52:49.023 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 00:52:49.038 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 00:52:49.049 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 00:52:49.453 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 00:52:49.467 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 00:52:49.523 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 00:58:51.679 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 00:58:51.712 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 00:58:51.722 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 00:58:51.732 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 00:58:52.072 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 00:58:52.088 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 00:58:52.143 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 01:01:15.590 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 01:01:15.623 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 01:01:15.636 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 01:01:15.646 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 01:01:15.976 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 01:01:15.992 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 01:01:16.052 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 01:02:06.918 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 01:02:06.951 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 01:02:06.964 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 01:02:06.970 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 01:02:07.351 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 01:02:07.370 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 01:02:07.427 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 01:05:10.250 INFO    tradesome.app.market akshare 同步：3 个标的 2172 根
+2026-11-10 01:09:40.423 INFO    tradesome.app.market akshare 同步：1 个标的 3754 根
+2026-11-10 01:10:07.230 INFO    tradesome.app.market akshare 同步：1 个标的 5097 根
+2026-11-10 01:10:07.230 INFO    tradesome.app.market akshare 同步：1 个标的 5726 根
+2026-11-10 01:10:10.065 INFO    tradesome.app.market akshare 同步：1 个标的 5726 根
+2026-11-10 01:10:24.196 INFO    tradesome.app.market akshare 同步：1 个标的 5097 根
+2026-11-10 01:10:29.841 INFO    tradesome.app.market akshare 同步：1 个标的 7695 根
+2026-11-10 01:10:32.951 INFO    tradesome.app.market akshare 同步：1 个标的 7695 根
+2026-11-10 01:10:36.074 INFO    tradesome.app.market akshare 同步：1 个标的 7695 根
+2026-11-10 01:10:38.978 INFO    tradesome.app.market akshare 同步：1 个标的 7695 根
+2026-11-10 01:10:41.808 INFO    tradesome.app.market akshare 同步：1 个标的 7695 根
+2026-11-10 01:11:25.422 INFO    tradesome.app.market akshare 同步：1 个标的 5097 根
+2026-11-10 01:11:26.421 INFO    tradesome.app.market akshare 同步：1 个标的 7695 根
+2026-11-10 01:11:29.013 INFO    tradesome.app.market akshare 同步：1 个标的 7695 根
+2026-11-10 01:11:31.413 INFO    tradesome.app.market akshare 同步：1 个标的 7695 根
+2026-11-10 01:11:33.848 INFO    tradesome.app.market akshare 同步：1 个标的 7695 根
+2026-11-10 01:11:49.425 INFO    tradesome.app.market akshare 同步：1 个标的 5097 根
+2026-11-10 01:11:54.705 INFO    tradesome.app.market akshare 同步：1 个标的 8000 根
+2026-11-10 01:11:57.470 INFO    tradesome.app.market akshare 同步：1 个标的 8000 根
+2026-11-10 01:11:59.945 INFO    tradesome.app.market akshare 同步：1 个标的 8000 根
+2026-11-10 01:12:36.730 INFO    tradesome.app.market akshare 同步：1 个标的 5639 根
+2026-11-10 01:16:20.320 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 01:16:20.349 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 01:16:20.360 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 01:16:20.367 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 01:16:20.843 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 01:16:20.855 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 01:16:20.897 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-10 01:18:20.564 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0 attempts=1
+2026-11-10 01:18:20.598 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1 attempts=2
+2026-11-10 01:18:20.609 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=None attempts=1
+2026-11-10 01:18:20.623 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0 attempts=1
+2026-11-10 01:18:21.038 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-10 01:18:21.055 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-10 01:18:21.098 INFO    tradesome.app.market akshare 同步：1 个标的 3 根

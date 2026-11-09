@@ -7,19 +7,19 @@ see http://goessner.net/articles/JsonPath/
 Based on on JavaScript version by Stefan Goessner at:
         https://goessner.net/articles/JsonPath/
         http://code.google.com/p/jsonpath/
-and Perl version by Kate Rhodes at:
-        http://github.com/masukomi/jsonpath-perl/tree/master
+and Perl version by Kay Rhodes at:
+        http://github.com/masukomi/jsonpath-perl/
 
 Python3 compatibily by Per J. Sandstrom
 """
 from __future__ import print_function
 
 __author__ = "Phil Budne"
-__revision__ = "$Revision: 1.17 $"
-__version__ = '0.82'
+__revision__ = "$Revision: 1.20 $"
+__version__ = '0.82.2'
 
 #	Copyright (c) 2007 Stefan Goessner (goessner.net)
-#       Copyright (c) 2008 Kate Rhodes (masukomi.org)
+#       Copyright (c) 2008 Kay Rhodes (masukomi.org)
 #       Copyright (c) 2008-2018 Philip Budne (ultimate.com)
 #	Licensed under the MIT licence: 
 #	
@@ -262,7 +262,7 @@ def jsonpath(obj, expr, result_type='VALUE', debug=0, use_eval=True):
         # XXX handle !@.name.name.name....
         def notvar(m):
             return "'%s' not in __obj" % m.group(1)
-        loc = re.sub("!@\.([a-zA-Z@_0-9-]*)", notvar, loc)
+        loc = re.sub(r"!@\.([a-zA-Z@_0-9-]*)", notvar, loc)
 
         # replace @.name.... with __obj['name']....
         # handle @.name[.name...].length
@@ -333,7 +333,7 @@ if __name__ == '__main__':
         sys.stdout.write("Usage: jsonpath.py FILE PATH [OUTPUT_TYPE]\n")
         sys.exit(1)
 
-    object = json.load(file(sys.argv[1]))
+    object = json.load(open(sys.argv[1]))
     path = sys.argv[2]
     format = 'VALUE'
 

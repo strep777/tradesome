@@ -291,11 +291,13 @@ class CandlestickChart(_ChartBase):
         if self.show_volume:
             self.create_line(left, volume_top - 6, right, volume_top - 6,
                              fill=theme.color("chart_grid"), dash=(2, 4))
-        for i in range(4):
-            index = int((n - 1) * i / 3)
+        indices = sorted({int((n - 1) * i / 3) for i in range(4)})
+        for j, index in enumerate(indices):
             bar = self.bars[index]
             x = left + slot * (index + 0.5)
-            anchor = "nw" if i == 0 else "ne" if i == 3 else "n"
+            anchor = "nw" if j == 0 else "ne" if j == len(indices) - 1 else "n"
+            if len(indices) == 1:
+                anchor = "n"
             self.create_text(x, bottom + 8, text=bar.dt.strftime("%Y-%m-%d"),
                              anchor=anchor, fill=theme.color("faint"),
                              font=theme.font("small"))

@@ -103,6 +103,9 @@ class AkshareSyncModal(Modal):
         self.install_button = Button(self.footer, "重试安装", variant="secondary",
                                      command=self._install)
         self._install_visible = False
+        self.all_button = Button(self.footer, "同步全部 A 股", variant="secondary",
+                                 command=self._sync_all)
+        self.all_button.pack(side="left")
 
         self._fill_symbols()
         self.after(60, self._check)
@@ -229,6 +232,61 @@ class AkshareSyncModal(Modal):
 
     # ---------------------------------------------------------- 同步
 
+    def _sync_all(self) -> None:
+        """一次抓取全市场当日快照（约 5500 只，1 分钟左右）。"""
+        if self._running:
+            return
+        self._running = True
+        self.sync_button.set_enabled(False)
+        self.all_button.set_enabled(False)
+        self.close_button.set_enabled(False)
+        self.progress.configure(mode="indeterminate")
+        self.progress.start(12)
+        self.status_label.configure(
+            text="正在抓取全部 A 股当日快照（约 5500 只，1 分钟左右）……",
+            fg=theme.color("muted"))
+        self._result = None
+        self._error = None
+
+        def worker() -> None:
+            try:
+                self._result = self.service.sync_a_share_list()
+            except Exception as exc:  # noqa: BLE001
+                self._error = str(exc)
+
+        self._thread = threading.Thread(target=worker, daemon=True,
+                                        name="akshare-all")
+        self._thread.start()
+        self.after(250, self._poll_all)
+
+    def _poll_all(self) -> None:
+        if not self._running:
+            return
+        if self._thread is not None and self._thread.is_alive():
+            self.after(250, self._poll_all)
+            return
+        self._running = False
+        self._stop_progress()
+        self.close_button.set_enabled(True)
+        self.all_button.set_enabled(True)
+        result = self._result or {}
+        if self._error or not result.get("ok"):
+            message = self._error or result.get("message") or "未知原因"
+            self.status_label.configure(text="同步全部 A 股失败：%s" % message,
+                                        fg=theme.color("danger"))
+            self.sync_button.set_enabled(True)
+            return
+        self.status_label.configure(
+            text="完成：已写入 %s 只 A 股当日快照。行情页现在可以看到全部 A 股；"
+                 "需要历史 K 线时再按标的同步。" % "{:,}".format(result.get("symbols", 0)),
+            fg=theme.color("success"))
+        self.sync_button.set_enabled(True)
+        if self.on_done is not None:
+            try:
+                self.on_done(result)
+            except Exception:  # noqa: BLE001
+                pass
+
     def _start(self) -> None:
         if self._running:
             return
@@ -305,6 +363,6 @@ class AkshareSyncModal(Modal):
                 pass
 
     def close(self) -> None:
-        if self._running:
+        if self._running or self._installing:
             return
         super().close()

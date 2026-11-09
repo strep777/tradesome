@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from datetime import date, datetime
@@ -23,6 +24,19 @@ if str(ROOT) not in sys.path:
 
 from tradesome.core.types import KIND_ETF, KIND_INDEX  # noqa: E402
 from tradesome.data.providers.akshare_csv import write_records  # noqa: E402
+
+
+def _force_direct() -> None:
+    """清掉系统代理环境变量。
+
+    akshare 内部用 requests，会读取 HTTP(S)_PROXY；本机 Clash 代理时快时慢，
+    直连 push2his.eastmoney.com 反而稳定。需要代理时用 --use-proxy 跳过。
+    """
+    for key in list(os.environ):
+        if key.upper() in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY"):
+            os.environ.pop(key, None)
+    os.environ["NO_PROXY"] = "*"
+    os.environ["no_proxy"] = "*"
 
 
 def _log(message: str) -> None:
@@ -84,14 +98,14 @@ def sync(symbols, start: date, end: date, out_dir: Path, adjust: str,
         kind = instrument.kind if instrument is not None else "STOCK"
         records = None
         last_error = None
-        for attempt in range(2):
+        for attempt in range(3):
             try:
                 records = _fetch(ak, symbol, kind, start, end, adjust)
                 break
             except Exception as exc:  # noqa: BLE001 - 单个标的失败不拖垮整批
                 last_error = exc
-                if attempt == 0:
-                    time.sleep(1.0)
+                if attempt < 2:
+                    time.sleep(1.5 * (attempt + 1))
         if records is None:
             message = "%s：%s" % (symbol, last_error)
             errors.append({"symbol": symbol, "message": str(last_error)})
@@ -115,6 +129,53 @@ def sync(symbols, start: date, end: date, out_dir: Path, adjust: str,
             "bars": total, "start": start.isoformat(), "end": end.isoformat()}
 
 
+def _fetch_spot(ak):
+    frame = ak.stock_zh_a_spot_em()
+    if frame is None or len(frame) == 0:
+        raise RuntimeError("A 股列表接口返回空数据（可能是网络失败或接口变更）")
+    return frame.to_dict("records")
+
+
+def _write_spot(records, target: Path) -> int:
+    import csv
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    rows = 0
+    with open(str(target), "w", encoding="utf-8-sig", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(["代码", "名称", "日期", "开盘", "最高", "最低",
+                         "收盘", "成交量", "成交额", "涨跌幅"])
+        for item in records:
+            code = str(item.get("代码") or "").strip()
+            if len(code) != 6 or not code.isdigit():
+                continue
+            try:
+                close = float(item.get("最新价") or 0)
+                open_ = float(item.get("今开") or close)
+                high = float(item.get("最高") or close)
+                low = float(item.get("最低") or close)
+                volume = float(item.get("成交量") or 0)
+                amount = float(item.get("成交额") or 0)
+            except (TypeError, ValueError):
+                continue
+            values = (open_, high, low, close)
+            if any(v != v for v in values) or close <= 0:
+                continue
+            if volume != volume:
+                volume = 0
+            if amount != amount:
+                amount = 0
+            writer.writerow([
+                code, str(item.get("名称") or "").strip(),
+                datetime.now().strftime("%Y-%m-%d"),
+                "%.3f" % open_, "%.3f" % high, "%.3f" % low, "%.3f" % close,
+                int(volume), "%.2f" % amount,
+                item.get("涨跌幅") or "",
+            ])
+            rows += 1
+    return rows
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="用 akshare 抓取 A 股/ETF/指数日线并写成 CSV")
     parser.add_argument("--symbols", default="", help="逗号分隔，如 600519.SH,000858.SZ")
@@ -125,7 +186,28 @@ def main(argv=None) -> int:
     parser.add_argument("--out", default=str(ROOT / "data" / "akshare"))
     parser.add_argument("--sleep", type=float, default=0.4, help="每个标的间隔秒数")
     parser.add_argument("--check", action="store_true", help="只检查 akshare 是否可用")
+    parser.add_argument("--all", action="store_true",
+                        help="抓取全部 A 股当日快照（约 1 分钟）")
+    parser.add_argument("--use-proxy", action="store_true", help="保留系统代理")
     args = parser.parse_args(argv)
+
+    if not args.use_proxy:
+        _force_direct()
+
+    if args.all:
+        try:
+            ak = _import_akshare()
+            records = _fetch_spot(ak)
+            target = Path(args.out) / "a_share_spot.csv"
+            rows = _write_spot(records, target)
+            print(json.dumps({"ok": rows > 0, "rows": rows,
+                              "file": str(target)}, ensure_ascii=False))
+            return 0 if rows else 1
+        except Exception as exc:  # noqa: BLE001
+            print(json.dumps({"ok": False, "rows": 0, "error": str(exc)},
+                             ensure_ascii=False))
+            print(str(exc), file=sys.stderr)
+            return 1
 
     if args.check:
         try:

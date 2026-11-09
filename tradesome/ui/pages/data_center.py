@@ -15,12 +15,12 @@ from .base import BasePage
 
 class DataPage(BasePage):
     title = "数据中心"
-    subtitle = "数据是回测的地基。真实日线用 akshare 同步，也可以导入标准 CSV。"
+    subtitle = "数据是回测的地基。全市场行情用 akshare 同步，也可以导入标准 CSV。"
 
     help_steps = [
-        '点「同步真实行情」从 akshare 抓取日线；需要先安装 akshare 并能联网。',
-        '导入 CSV 时文件名用代码命名（如 600519.SH.csv）。',
-        '选中标的后可以检查质量、导出或删除。',
+        '点「同步全部 A 股」抓取 5000 多只当日快照，约 1 分钟；之后行情页可搜索全部 A 股。',
+        '点「同步真实行情」给选中的标的抓多年日线，用于回测；需要联网。',
+        '导入 CSV 时文件名用代码命名（如 600519.SH.csv）；选中标的后可检查质量、导出或删除。',
     ]
 
     def tour_targets(self) -> dict:
@@ -34,6 +34,8 @@ class DataPage(BasePage):
         self._sync_button = Button(bar, "同步真实行情", command=self._sync,
                                    variant="primary", size="sm")
         self._sync_button.pack(side="left", padx=(0, 6))
+        Button(bar, "同步全部 A 股", command=self._sync_all, variant="secondary",
+               size="sm").pack(side="left", padx=(0, 6))
         Button(bar, "导入 CSV", command=self._import, variant="secondary",
                size="sm").pack(side="left", padx=(0, 6))
         Button(bar, "导出选中", command=self._export, variant="ghost",
@@ -140,6 +142,19 @@ class DataPage(BasePage):
                 "success")
 
         AkshareSyncModal(self, self.c.services.market, on_done=done).show()
+
+    def _sync_all(self) -> None:
+        """一次抓全市场当日快照，约 1 分钟。"""
+        def done(summary: dict) -> None:
+            self._symbol = None
+            self.refresh()
+            self.shell.refresh_status()
+            self.toast("已同步 %s 只 A 股" % "{:,}".format(
+                summary.get("symbols", 0)), "success")
+
+        modal = AkshareSyncModal(self, self.c.services.market, on_done=done)
+        modal.show()
+        modal.after(120, modal._sync_all)
 
     def _import(self) -> None:
         paths = filedialog.askopenfilenames(

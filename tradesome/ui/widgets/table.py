@@ -101,6 +101,16 @@ class DataTable(tk.Frame):
             return None
         return self._rows.get(selection[0])
 
+    def select_value(self, column: str, value) -> Optional[dict]:
+        """按列值选中一行（用于刷新后保持选择）。"""
+        for iid, row in self._rows.items():
+            if str(row.get(column)) == str(value):
+                self.tree.selection_set(iid)
+                self.tree.focus(iid)
+                self.tree.see(iid)
+                return row
+        return None
+
     def select_first(self) -> Optional[dict]:
         children = self.tree.get_children()
         if not children:

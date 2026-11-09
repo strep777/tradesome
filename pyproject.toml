@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tradesome"
+version = "1.0.0"
+description = "TradeSome —— 本地桌面量化交易工作站（回测 / 模拟盘 / 策略实验室）"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "TradeSome" }]
+keywords = ["quant", "backtest", "trading", "tkinter", "desktop"]
+classifiers = [
+  "Environment :: Win32 (MS Windows)",
+  "Intended Audience :: Financial and Insurance Industry",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Topic :: Office/Business :: Financial :: Investment",
+]
+dependencies = []
+
+[project.optional-dependencies]
+build = ["pillow>=9.0", "pyinstaller>=5.0"]
+data = ["akshare>=1.14"]
+
+[project.scripts]
+tradesome = "tradesome.cli:main"
+
+[project.gui-scripts]
+tradesome-gui = "tradesome.cli:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["tradesome*"]

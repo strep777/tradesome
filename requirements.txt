@@ -1,0 +1,5 @@
+# TradeSome 运行时零第三方依赖，只需要 Python 3.9+（自带 tkinter 与 sqlite3）。
+# 下面这些只在开发/打包时需要：
+#   pillow       生成 assets/app.ico 与示例图片
+#   pyinstaller  打包成独立 exe
+# 安装：python -m pip install -r requirements-dev.txt

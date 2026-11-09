@@ -1,0 +1,247 @@
+2026-11-08 15:45:08.019 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 15:45:11.648 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 15:45:11.853 ERROR   tradesome.app.backtest 回测结果落库失败
+Traceback (most recent call last):
+  File "F:\tradesome\tradesome\app\services\backtest_service.py", line 135, in _worker
+    self.c.repos.backtests.save(result)
+  File "F:\tradesome\tradesome\persistence\repositories.py", line 282, in save
+    benchmark = [[dt.strftime(_TIME_FMT), round(v, 4)] for dt, v in result.benchmark_curve]
+TypeError: 'NoneType' object is not iterable
+2026-11-08 15:45:11.853 INFO    tradesome.app.backtest 回测完成 BT-20261108-DDSU76，用时 0.17s
+2026-11-08 15:54:16.133 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 15:54:30.345 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:22:41.192 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:23:23.783 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:23:43.447 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:23:53.541 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:24:49.828 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:25:05.013 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:28:01.355 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:28:54.727 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:30:21.236 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:31:34.138 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:32:54.913 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:33:19.525 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:33:44.393 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:34:04.757 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:34:34.235 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:34:59.309 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:35:45.863 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 16:54:15.692 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 17:04:31.499 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 17:11:59.917 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 17:11:59.977 INFO    tradesome.app.backtest 回测完成 BT-20261108-81F9EB，用时 0.03s
+2026-11-08 17:12:06.752 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 17:12:06.815 INFO    tradesome.app.backtest 回测完成 BT-20261108-CVPJ0X，用时 0.03s
+2026-11-08 17:13:01.953 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 17:14:23.248 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 17:15:30.505 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 17:15:47.681 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 17:16:04.369 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 17:16:48.416 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 17:17:26.600 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 17:18:43.806 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 17:18:44.437 INFO    tradesome.app.backtest 回测完成 BT-20261108-59DPKK，用时 0.44s
+2026-11-08 17:18:44.898 INFO    tradesome.app.backtest 回测完成 BT-20261108-M88U0Y，用时 0.42s
+2026-11-08 17:18:45.375 INFO    tradesome.app.backtest 回测完成 BT-20261108-9MKG2Q，用时 0.45s
+2026-11-08 21:04:45.561 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:05:32.535 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:10:05.098 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:10:40.082 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:10:56.266 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:11:01.949 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:11:07.575 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:11:20.155 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:22:51.308 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:23:07.779 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:23:27.598 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:24:18.255 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:32:16.129 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:33:15.037 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:33:15.084 INFO    tradesome.app.backtest 回测完成 BT-20261108-JVFHSX，用时 0.03s
+2026-11-08 21:33:38.109 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:33:48.202 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:34:25.414 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:34:48.790 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 21:36:24.856 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:02:15.809 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:04:28.514 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:05:18.657 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:05:18.702 INFO    tradesome.app.backtest 回测完成 BT-20261108-E1RMBA，用时 0.01s
+2026-11-08 22:27:58.248 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:29:35.390 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:44:58.451 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:47:06.597 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:48:21.690 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:48:56.501 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:50:27.351 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:50:59.257 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:51:29.780 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:51:41.242 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:52:05.934 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:53:11.174 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:53:46.650 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:54:54.517 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:55:10.936 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:56:06.040 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:56:18.524 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 22:56:53.373 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 23:07:34.866 INFO    tradesome.app.live 模拟盘启动 LIVE-20261108230734
+2026-11-08 23:07:37.968 WARNING tradesome.execution.router 订单被拒 BUY 300750.SZ：没有可用行情，无法下单
+2026-11-08 23:07:38.351 WARNING tradesome.execution.router 订单被拒 BUY 002594.SZ：没有可用行情，无法下单
+2026-11-08 23:07:40.904 WARNING tradesome.execution.router 订单被拒 BUY 300750.SZ：没有可用行情，无法下单
+2026-11-08 23:07:41.413 WARNING tradesome.execution.router 订单被拒 BUY 300750.SZ：没有可用行情，无法下单
+2026-11-08 23:07:43.373 WARNING tradesome.execution.router 订单被拒 BUY 000858.SZ：没有可用行情，无法下单
+2026-11-08 23:07:47.077 WARNING tradesome.execution.router 订单被拒 BUY 300750.SZ：没有可用行情，无法下单
+2026-11-08 23:07:50.673 WARNING tradesome.execution.router 订单被拒 BUY 002594.SZ：没有可用行情，无法下单
+2026-11-08 23:07:53.378 WARNING tradesome.execution.router 订单被拒 BUY 002594.SZ：没有可用行情，无法下单
+2026-11-08 23:07:53.378 WARNING tradesome.execution.router 订单被拒 BUY 300750.SZ：没有可用行情，无法下单
+2026-11-08 23:07:54.561 WARNING tradesome.execution.router 订单被拒 BUY 000858.SZ：没有可用行情，无法下单
+2026-11-08 23:07:54.689 WARNING tradesome.execution.router 订单被拒 BUY 000858.SZ：没有可用行情，无法下单
+2026-11-08 23:07:54.817 WARNING tradesome.execution.router 订单被拒 BUY 000858.SZ：没有可用行情，无法下单
+2026-11-08 23:07:54.945 WARNING tradesome.execution.router 订单被拒 BUY 300750.SZ：没有可用行情，无法下单
+2026-11-08 23:07:55.984 WARNING tradesome.execution.router 订单被拒 BUY 002594.SZ：没有可用行情，无法下单
+2026-11-08 23:08:04.605 WARNING tradesome.execution.router 订单被拒 BUY 000858.SZ：没有可用行情，无法下单
+2026-11-08 23:08:04.748 WARNING tradesome.execution.router 订单被拒 BUY 000858.SZ：没有可用行情，无法下单
+2026-11-08 23:10:08.789 INFO    tradesome.app.live 模拟盘停止 LIVE-20261108230734
+2026-11-08 23:10:46.439 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 23:11:08.137 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 23:11:31.638 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-08 23:12:23.119 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:14:58.174 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:14:58.190 INFO    tradesome.app.strategy 已保存策略档案 我的双均线（custom_20f21d2c4f）
+2026-11-09 18:15:07.513 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:15:07.513 INFO    tradesome.app.strategy 已保存策略档案 我的双均线（custom_d0fc4bfba3）
+2026-11-09 18:15:16.872 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:15:16.873 INFO    tradesome.app.strategy 已保存策略档案 我的双均线（custom_44226b8a96）
+2026-11-09 18:15:16.907 ERROR   tradesome.backtest.engine 策略执行异常
+Traceback (most recent call last):
+  File "F:\tradesome\tradesome\backtest\engine.py", line 375, in run
+    self.strategy.on_bars(today_bars, moment)
+  File "F:\tradesome\tradesome\strategy\base.py", line 176, in on_bars
+    self.on_bar(bar)
+  File "F:\tradesome\tradesome\strategy\profile.py", line 224, in on_bar
+    self._blocked = self._trend_blocked(bar)
+  File "F:\tradesome\tradesome\strategy\profile.py", line 249, in _trend_blocked
+    average = last(_sma(closes, period))
+  File "F:\tradesome\tradesome\strategy\base.py", line 243, in last
+    value = values[-1]
+TypeError: 'float' object is not subscriptable
+2026-11-09 18:15:36.556 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:15:36.557 INFO    tradesome.app.strategy 已保存策略档案 我的双均线（custom_dd6db66510）
+2026-11-09 18:15:36.588 ERROR   tradesome.backtest.engine 策略执行异常
+Traceback (most recent call last):
+  File "F:\tradesome\tradesome\backtest\engine.py", line 375, in run
+    self.strategy.on_bars(today_bars, moment)
+  File "F:\tradesome\tradesome\strategy\base.py", line 176, in on_bars
+    self.on_bar(bar)
+  File "F:\tradesome\tradesome\strategy\profile.py", line 224, in on_bar
+    self._blocked = self._trend_blocked(bar)
+  File "F:\tradesome\tradesome\strategy\profile.py", line 249, in _trend_blocked
+    average = last(_sma(closes, period))
+  File "F:\tradesome\tradesome\strategy\base.py", line 243, in last
+    value = values[-1]
+TypeError: 'float' object is not subscriptable
+2026-11-09 18:15:49.824 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:15:49.824 INFO    tradesome.app.strategy 已保存策略档案 我的双均线（custom_985ecf5ebc）
+2026-11-09 18:16:00.273 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:16:00.273 INFO    tradesome.app.strategy 已保存策略档案 我的双均线（custom_e790d571a8）
+2026-11-09 18:19:04.939 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:19:08.639 INFO    tradesome.app.strategy 已保存策略档案 我的双均线（custom_bf4eb0ae06）
+2026-11-09 18:20:29.704 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:20:32.679 INFO    tradesome.app.strategy 已保存策略档案 我的双均线（custom_e966fcbdb3）
+2026-11-09 18:21:06.707 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:21:09.680 INFO    tradesome.app.strategy 已保存策略档案 我的双均线（custom_db4dee14c9）
+2026-11-09 18:22:38.703 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:22:41.567 INFO    tradesome.app.strategy 已保存策略档案 我的双均线（custom_b967804bb8）
+2026-11-09 18:32:50.834 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:33:16.839 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:33:20.143 INFO    tradesome.app.strategy 已保存策略档案 我的双均线（custom_5b67fb4e6a）
+2026-11-09 18:34:14.372 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:34:17.596 INFO    tradesome.app.strategy 已保存策略档案 我的双均线（custom_a9f1db084a）
+2026-11-09 18:35:16.081 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:35:19.191 INFO    tradesome.app.strategy 已保存策略档案 我的双均线（custom_7bd91b218e）
+2026-11-09 18:35:47.730 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:35:50.854 INFO    tradesome.app.strategy 已保存策略档案 我的双均线（custom_c3b81753c1）
+2026-11-09 18:37:28.446 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 18:37:28.446 INFO    tradesome.app.strategy 已保存策略档案 端到端自检策略（custom_825388e24e）
+2026-11-09 18:37:28.546 INFO    tradesome.app.backtest 回测完成 BT-20261109-L4202W，用时 0.05s
+2026-11-09 20:31:24.660 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 20:31:24.660 INFO    tradesome.app.strategy 已保存策略档案 我的突破策略（custom_62f10db31e）
+2026-11-09 20:31:24.759 INFO    tradesome.app.backtest 回测完成 BT-20261109-FXCU22，用时 0.08s
+2026-11-09 20:31:39.959 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 20:31:39.963 INFO    tradesome.app.strategy 已保存策略档案 Tma（custom_9c92bf1c60）
+2026-11-09 20:31:40.043 INFO    tradesome.app.backtest 回测完成 BT-20261109-2ZNY20，用时 0.03s
+2026-11-09 20:31:40.043 INFO    tradesome.app.strategy 已保存策略档案 Tbreakout（custom_613025bee7）
+2026-11-09 20:31:40.089 INFO    tradesome.app.backtest 回测完成 BT-20261109-C2YU1T，用时 0.03s
+2026-11-09 20:31:40.089 INFO    tradesome.app.strategy 已保存策略档案 Trsi（custom_4afdd2dfda）
+2026-11-09 20:31:40.137 INFO    tradesome.app.backtest 回测完成 BT-20261109-VFC63A，用时 0.05s
+2026-11-09 20:31:40.137 INFO    tradesome.app.strategy 已保存策略档案 Tboll（custom_9d0558af16）
+2026-11-09 20:31:40.204 INFO    tradesome.app.backtest 回测完成 BT-20261109-26U63H，用时 0.06s
+2026-11-09 20:31:40.214 INFO    tradesome.app.strategy 已保存策略档案 Tmomentum（custom_f75778eca4）
+2026-11-09 20:31:40.283 INFO    tradesome.app.backtest 回测完成 BT-20261109-45HAVM，用时 0.06s
+2026-11-09 20:31:40.283 INFO    tradesome.app.strategy 已保存策略档案 Tvolume（custom_cc83a7b729）
+2026-11-09 20:31:40.359 INFO    tradesome.app.backtest 回测完成 BT-20261109-YYYFE3，用时 0.06s
+2026-11-09 20:36:08.473 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 20:37:02.745 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 20:40:47.365 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 20:41:13.795 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 20:41:58.204 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 20:46:47.079 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 20:47:00.011 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 20:47:30.715 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 21:00:34.800 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 1 次，会话 1 个
+2026-11-09 21:02:12.635 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 21:02:12.651 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-09 21:02:12.713 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-09 21:02:21.099 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 21:02:21.099 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-09 21:02:21.157 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-09 21:03:19.554 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 21:03:19.586 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-09 21:03:19.634 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-09 21:09:55.551 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 21:11:44.709 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 21:11:44.720 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-09 21:11:44.758 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-09 21:14:39.200 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 21:14:53.403 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 21:15:41.168 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 21:15:41.193 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-09 21:15:41.228 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-09 21:17:32.885 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 21:17:32.899 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-09 21:17:32.926 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-09 21:19:03.698 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 21:25:01.345 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 rc=0
+2026-11-09 21:25:01.379 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 rc=0
+2026-11-09 21:25:01.718 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 21:25:01.746 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-09 21:25:01.758 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-09 21:26:41.296 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 rc=0
+2026-11-09 21:26:41.322 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 rc=0
+2026-11-09 21:26:41.756 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 21:26:41.763 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-09 21:26:41.829 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-09 21:30:15.860 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 rc=0
+2026-11-09 21:30:15.878 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 rc=0
+2026-11-09 21:30:16.255 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 21:30:16.268 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-09 21:30:16.331 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-09 21:32:34.265 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 rc=0
+2026-11-09 21:32:34.288 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 rc=0
+2026-11-09 21:32:34.596 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 21:32:34.603 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-09 21:32:34.648 INFO    tradesome.app.market akshare 同步：1 个标的 3 根
+2026-11-09 23:10:53.609 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 rc=1
+2026-11-09 23:11:14.632 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 rc=1
+2026-11-09 23:11:31.677 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 rc=1
+2026-11-09 23:11:48.953 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 rc=1
+2026-11-09 23:13:05.093 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=1 rc=1
+2026-11-09 23:13:09.863 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=1 rc=1
+2026-11-09 23:15:57.123 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=0 skipped=1 rc=0
+2026-11-09 23:15:57.158 INFO    tradesome.app.market akshare 自动安装：ok=False wheels=0 skipped=1 rc=1
+2026-11-09 23:15:57.173 INFO    tradesome.app.market akshare 自动安装：ok=True wheels=1 skipped=0 rc=0
+2026-11-09 23:15:57.483 INFO    tradesome.app.market 生成演示数据：8 个标的 9336 根
+2026-11-09 23:15:57.493 INFO    tradesome.app.market 清空数据：行情 9336 根，回测 0 次，会话 0 个
+2026-11-09 23:15:57.558 INFO    tradesome.app.market akshare 同步：1 个标的 3 根

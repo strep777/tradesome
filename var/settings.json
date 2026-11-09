@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "appearance": {
+    "theme": "light",
+    "font_scale": 1.0,
+    "start_page": "dashboard",
+    "show_tips": true
+  },
+  "trading": {
+    "initial_cash": 100000.0,
+    "commission_rate": 0.00025,
+    "min_commission": 5.0,
+    "stamp_tax_rate": 0.0005,
+    "transfer_fee_rate": 1e-05,
+    "slippage_bps": 2.0,
+    "max_volume_ratio": 0.05,
+    "benchmark": "000300.SH"
+  },
+  "risk": {
+    "single_trade_pct": 0.25,
+    "single_symbol_pct": 0.25,
+    "max_gross_exposure": 0.8,
+    "daily_loss_halt": 0.03,
+    "daily_loss_close": 0.05,
+    "max_drawdown_reduce": 0.15,
+    "max_drawdown_halt": 0.2,
+    "max_orders_per_minute": 20,
+    "enabled_rules": [
+      "single_trade",
+      "single_symbol",
+      "gross_exposure",
+      "daily_loss",
+      "drawdown",
+      "order_rate",
+      "price_band",
+      "session"
+    ],
+    "kill_switch": false
+  },
+  "data": {
+    "default_timeframe": "1d",
+    "auto_generate_demo": true,
+    "synthetic_seed": 42
+  },
+  "security": {
+    "vault_enabled": true,
+    "mask_secrets": true
+  },
+  "live": {
+    "enabled": false,
+    "gateway_kind": "sim",
+    "qmt_path": "",
+    "qmt_account": "",
+    "qmt_account_type": "STOCK",
+    "auto_trade": false,
+    "run_time": "14:55",
+    "max_order_value": 50000.0,
+    "max_orders_per_day": 200,
+    "allow_market_orders": false,
+    "require_confirm": true
+  },
+  "advanced": {
+    "log_level": "INFO",
+    "max_workers": 2,
+    "backtest_progress_every": 50
+  },
+  "first_run": true
+}

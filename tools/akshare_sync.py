@@ -179,7 +179,7 @@ def _write_spot(records, target: Path) -> int:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="用 akshare 抓取 A 股/ETF/指数日线并写成 CSV")
     parser.add_argument("--symbols", default="", help="逗号分隔，如 600519.SH,000858.SZ")
-    parser.add_argument("--start", default="", help="YYYY-MM-DD，默认三年前")
+    parser.add_argument("--start", default="1990-01-01", help="YYYY-MM-DD，默认全部历史")
     parser.add_argument("--end", default="", help="YYYY-MM-DD，默认今天")
     parser.add_argument("--adjust", default="qfq", choices=["qfq", "hfq", ""],
                         help="复权方式，指数忽略")
@@ -226,7 +226,7 @@ def main(argv=None) -> int:
     try:
         end = datetime.strptime(args.end, "%Y-%m-%d").date() if args.end else date.today()
         start = (datetime.strptime(args.start, "%Y-%m-%d").date() if args.start
-                 else date(end.year - 3, end.month, end.day))
+                 else date(1990, 1, 1))
     except ValueError as exc:
         print("日期格式应为 YYYY-MM-DD：%s" % exc, file=sys.stderr)
         return 3

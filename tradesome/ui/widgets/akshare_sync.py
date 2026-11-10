@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import threading
 import tkinter as tk
-from datetime import date, timedelta
+from datetime import date
 from tkinter import ttk
 from typing import Dict, List, Optional
 
@@ -73,8 +73,8 @@ class AkshareSyncModal(Modal):
         right.configure(width=theme.px(230))
         right.pack_propagate(False)
         today = date.today()
-        self.start_entry = LabeledEntry(right, "开始日期", str(today - timedelta(days=365 * 3)),
-                                        hint="YYYY-MM-DD", width=14)
+        self.start_entry = LabeledEntry(right, "开始日期", "1990-01-01",
+                                        hint="默认全部历史", width=14)
         self.start_entry.pack(fill="x", pady=(0, theme.px(8)))
         self.end_entry = LabeledEntry(right, "结束日期", str(today),
                                       hint="YYYY-MM-DD", width=14)

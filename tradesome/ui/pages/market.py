@@ -38,6 +38,7 @@ class MarketPage(BasePage):
         self._hist_loading = set()
         self._hist_failed = {}
         self._hist_result = {}
+        self._hist_checked = set()
         self._suppress_select = False
         header = self.page_header()
         self._build_toolbar(header)
@@ -78,6 +79,15 @@ class MarketPage(BasePage):
         from ..charts import CandlestickChart
         self.chart = CandlestickChart(right.body, height=322)
         self.chart.pack(fill="both", expand=True, pady=(theme.px(10), theme.px(6)))
+        self.chart.on_view_change = self._update_stats_range
+
+        self.locate_entry = ttk.Entry(header_row, width=11, font=theme.font("caption"))
+        self.locate_entry.pack(side="right", padx=(theme.px(4), theme.px(4)))
+        self.locate_entry.insert(0, "YYYY-MM-DD")
+        self.locate_entry.bind("<FocusIn>", self._clear_locate_hint)
+        self.locate_entry.bind("<Return>", lambda e: self._locate_date())
+        Button(header_row, "定位", command=self._locate_date, variant="ghost",
+               size="sm", width=44).pack(side="right")
 
         Button(header_row, "重置", command=lambda: self.chart.reset_zoom(),
                variant="ghost", size="sm", width=44).pack(side="right",
@@ -187,7 +197,7 @@ class MarketPage(BasePage):
 
     # ---------------------------------------------------------- 历史日线
     def _ensure_history(self, force: bool = False) -> None:
-        """只有当日快照时，后台补齐该股全部历史日线。"""
+        """历史不足（例如只有当日快照）时，后台补齐该股全部历史日线。"""
         symbol = self._symbol
         if not symbol or symbol in self._hist_loading:
             return
@@ -197,8 +207,11 @@ class MarketPage(BasePage):
             bars = self.c.services.market.history(symbol, "1d")
         except Exception:  # noqa: BLE001 - 图表不应因读库失败而崩
             bars = []
-        if not force and len(bars) > 2:
+        if not force and (len(bars) >= 1000 or symbol in self._hist_checked):
             return
+        if force:
+            self._hist_checked.discard(symbol)
+        self._hist_checked.add(symbol)
         self._hist_loading.add(symbol)
         self._hist_failed.pop(symbol, None)
         self.change_label.configure(text="正在补齐该股历史日线…", fg=theme.color("muted"))
@@ -246,6 +259,46 @@ class MarketPage(BasePage):
             return
         self._ensure_history(force=True)
 
+    def _clear_locate_hint(self, _event=None) -> None:
+        if self.locate_entry.get() == "YYYY-MM-DD":
+            self.locate_entry.delete(0, "end")
+
+    def _locate_date(self) -> None:
+        text = (self.locate_entry.get() or "").strip()
+        try:
+            target = date.fromisoformat(text)
+        except ValueError:
+            self.toast("日期格式应为 YYYY-MM-DD，例如 2024-06-03", "warning")
+            return
+        if not self._bars:
+            self.toast("当前没有 K 线可定位", "warning")
+            return
+        if self.range_var.get() != "全部历史":
+            self.range_var.set("全部历史")
+            self._load_chart()
+        bars = self._bars
+        if not bars:
+            return
+        index = min(range(len(bars)),
+                    key=lambda i: abs((bars[i].dt.date() - target).days))
+        span = 120
+        start = max(0, index - span // 2)
+        end = min(len(bars), start + span)
+        start = max(0, end - span)
+        self.chart.set_view(start, end)
+        self.toast("已定位到 %s（%s）" % (bars[index].dt.strftime("%Y-%m-%d"),
+                                         self.name_label.cget("text")), "info")
+
+    def _update_stats_range(self) -> None:
+        if not hasattr(self, "stats") or not self._bars:
+            return
+        start, end = self.chart.view_range()
+        if end <= start:
+            return
+        first = self._bars[start].dt.strftime("%Y-%m-%d")
+        last = self._bars[end - 1].dt.strftime("%Y-%m-%d")
+        self.stats["range"].set("%s ~ %s" % (first, last))
+
     def _load_chart(self) -> None:
         symbol = self._symbol
         if not symbol:
@@ -288,8 +341,7 @@ class MarketPage(BasePage):
         self.stats["high"].set(fmt.money(latest.high))
         self.stats["low"].set(fmt.money(latest.low))
         self.stats["amount"].set(fmt.compact(latest.amount))
-        self.stats["range"].set("%s ~ %s" % (bars[0].dt.strftime("%Y-%m-%d"),
-                                             bars[-1].dt.strftime("%Y-%m-%d")))
+        self._update_stats_range()
 
     def _use_for_backtest(self) -> None:
         if not self._symbol:

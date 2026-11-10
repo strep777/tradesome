@@ -77,7 +77,7 @@ class ShellSmokeTest(unittest.TestCase):
 
     def test_toast_leaves_no_ghost_when_empty(self) -> None:
         stack = self.app.toasts._stack
-        self.app.toasts.show("测试提示", "info", duration=10)
+        self.app.toasts.show("测试提示", "info", duration=150)
         self.app.update()
         self.assertTrue(stack.winfo_ismapped(), "提示应显示")
         for _ in range(30):
@@ -174,6 +174,40 @@ class ShellSmokeTest(unittest.TestCase):
                if row["name"] == "从零组合冒烟"][0]
         meta = self.container.services.strategy.meta(key)
         self.assertEqual(meta["kind"], "rules")
+
+    def test_backtest_page_produces_metrics(self) -> None:
+        self.app.navigate("backtest")
+        self.app.update()
+        page = self.app._pages["backtest"]
+        selected = page._selected_symbols()
+        self.assertTrue(selected, "回测默认没有选标的")
+        for symbol in selected:
+            coverage = self.container.repos.bars.coverage(symbol, "1d")
+            self.assertGreaterEqual(coverage[0] if coverage else 0, 120,
+                                    "%s 默认标的历史不足" % symbol)
+        self.assertLess(page.start_entry.get(), page.end_entry.get())
+        page._start()
+        deadline = time.time() + 30
+        while self.container.services.backtest.is_running() and time.time() < deadline:
+            self.app.update()
+            time.sleep(0.03)
+        self.app.update()
+        self.assertFalse(self.container.services.backtest.is_running())
+        self.assertNotEqual(page.kpis["total_return"].value_label.cget("text"), "—",
+                            "回测完成后收益没有显示")
+        self.assertNotEqual(page.kpis["trade_count"].value_label.cget("text"), "—")
+
+    def test_backtest_rejects_bad_extra_symbol(self) -> None:
+        self.app.navigate("backtest")
+        self.app.update()
+        page = self.app._pages["backtest"]
+        page.extra_entry.set("不是代码")
+        with self.assertRaises(ValueError):
+            page._selected_symbols()
+        page.extra_entry.set("000001.SZ，600519.SH")
+        symbols = page._selected_symbols()
+        self.assertIn("000001.SZ", symbols)
+        self.assertIn("600519.SH", symbols)
 
 
 if __name__ == "__main__":

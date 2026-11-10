@@ -8,7 +8,7 @@ from __future__ import annotations
 import math
 import tkinter as tk
 from datetime import datetime
-from typing import List, Optional, Sequence, Tuple
+from typing import Callable, List, Optional, Sequence, Tuple
 
 from . import theme
 from ..strategy.indicators import sma
@@ -217,6 +217,7 @@ class CandlestickChart(_ChartBase):
         self._start = 0
         self._end = 0
         self._drag_x: Optional[int] = None
+        self.on_view_change: Optional[Callable[[], None]] = None
         self.bind("<Motion>", self._on_motion)
         self.bind("<Leave>", lambda e: self.delete("crosshair"))
         self.bind("<MouseWheel>", self._on_wheel)
@@ -235,11 +236,36 @@ class CandlestickChart(_ChartBase):
         self._start = 0
         self._end = len(self.bars)
         self._schedule()
+        self._notify_view()
 
     def reset_zoom(self) -> None:
         self._start = 0
         self._end = len(self.bars)
         self._schedule()
+        self._notify_view()
+
+    def set_view(self, start: int, end: int) -> None:
+        """直接设置可见窗口（用于按日期定位），自动夹紧到合法范围。"""
+        n = len(self.bars)
+        if n == 0:
+            return
+        start = max(0, min(n - 1, int(start)))
+        end = max(start + 1, min(n, int(end)))
+        if end - start < self.MIN_BARS and n >= self.MIN_BARS:
+            end = min(n, start + self.MIN_BARS)
+            start = max(0, end - self.MIN_BARS)
+        self._start = start
+        self._end = end
+        self._schedule()
+        self._notify_view()
+
+    def _notify_view(self) -> None:
+        callback = self.on_view_change
+        if callback is not None:
+            try:
+                callback()
+            except Exception:  # noqa: BLE001 - 视图回调不应影响图表
+                pass
 
     def view_range(self) -> Tuple[int, int]:
         return self._start, self._end
@@ -257,6 +283,7 @@ class CandlestickChart(_ChartBase):
         self._start = new_start
         self._end = new_start + new_count
         self._schedule()
+        self._notify_view()
 
     def pan(self, bars_delta: int) -> None:
         n = len(self.bars)
@@ -268,6 +295,7 @@ class CandlestickChart(_ChartBase):
             self._start = new_start
             self._end = new_start + count
             self._schedule()
+            self._notify_view()
 
     # ------------------------------------------------------------ 交互
     def _wheel_step(self, direction: int) -> str:

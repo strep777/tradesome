@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import tkinter as tk
 from datetime import date, datetime, timedelta
 from tkinter import ttk
@@ -12,6 +13,8 @@ from ..widgets import (Button, Card, DataTable, KpiCard, LabeledEntry,
 from ..widgets.card import ScrollableFrame
 from .. import formatting as fmt
 from .base import BasePage
+from ...core.instruments import normalize_symbol
+from ...security.validation import validate_symbol
 
 
 class BacktestPage(BasePage):
@@ -30,6 +33,7 @@ class BacktestPage(BasePage):
     def build(self) -> None:
         self._result = None
         self._poll_job = None
+        self._error_reported = False
         self._symbol_vars = {}
         header = self.page_header()
         bar = tk.Frame(header, bg=theme.color("bg"))
@@ -51,8 +55,7 @@ class BacktestPage(BasePage):
         card.configure(width=theme.px(330))
         card.pack(side="left", fill="y")
         card.pack_propagate(False)
-        SectionHeader(card.body, "回测配置",
-                      "先选策略与标的，再设区间。").pack(fill="x")
+        SectionHeader(card.body, "回测配置").pack(fill="x")
 
         tk.Label(card.body, text="策略", bg=theme.color("surface"),
                  fg=theme.color("muted"), font=theme.font("caption"),
@@ -69,8 +72,12 @@ class BacktestPage(BasePage):
         symbols_box.pack(fill="x", pady=(4, theme.px(8)))
         scroller = ScrollableFrame(symbols_box, bg=theme.color("surface"))
         scroller.pack(fill="both", expand=True)
-        scroller.canvas.configure(height=theme.px(120))
+        scroller.canvas.configure(height=theme.px(88))
         self._symbol_holder = scroller.body
+
+        self.extra_entry = LabeledEntry(card.body, "额外代码（逗号分隔）", "",
+                                        hint="", width=12)
+        self.extra_entry.pack(fill="x", pady=(0, theme.px(6)))
 
         row = tk.Frame(card.body, bg=theme.color("surface"))
         row.pack(fill="x", pady=(0, theme.px(6)))
@@ -176,27 +183,41 @@ class BacktestPage(BasePage):
             child.destroy()
         self._symbol_vars.clear()
         universe = self.c.services.market.universe()
-        defaults = {item["symbol"] for item in universe[:3]}
+        counts = {}
+        for item in universe:
+            cov = self.c.repos.bars.coverage(item["symbol"], "1d")
+            counts[item["symbol"]] = cov[0] if cov else 0
+        ranked = sorted(universe, key=lambda item: -counts.get(item["symbol"], 0))
+        defaults = [item["symbol"] for item in ranked
+                    if counts.get(item["symbol"], 0) >= 120][:3]
+        if not defaults:
+            defaults = [item["symbol"] for item in universe[:3]]
         for item in universe:
             var = tk.BooleanVar(value=item["symbol"] in defaults if not existing
                                 else item["symbol"] in existing)
-            Toggle(self._symbol_holder, "%s %s" % (item["symbol"], item["name"]),
-                   var).pack(anchor="w", pady=theme.px(2))
+            label = "%s %s" % (item["symbol"], item["name"])
+            if counts.get(item["symbol"]):
+                label += "  (%d)" % counts[item["symbol"]]
+            Toggle(self._symbol_holder, label, var).pack(anchor="w", pady=theme.px(2))
             self._symbol_vars[item["symbol"]] = var
 
     def _refresh_dates(self) -> None:
         if self.start_entry.get() and self.end_entry.get():
             return
-        summary = self.c.services.market.summary()
-        end = None
-        start = None
-        for symbol in self._symbol_vars:
+        ranges = []
+        for symbol in self._selected_symbols():
             cov = self.c.repos.bars.coverage(symbol, "1d")
-            if cov and cov[2]:
-                end = cov[2] if end is None or cov[2] > end else end
-                start = cov[1] if start is None or (cov[1] and cov[1] < start) else start
-        end = end or datetime.now()
-        start = start or (end - timedelta(days=365 * 3))
+            if cov and cov[0] >= 2 and cov[1] and cov[2]:
+                ranges.append((cov[1], cov[2]))
+        if ranges:
+            start = max(r[0] for r in ranges)
+            end = min(r[1] for r in ranges)
+        else:
+            end = datetime.now()
+            start = end - timedelta(days=365 * 3)
+        if start >= end:
+            end = datetime.now()
+            start = end - timedelta(days=365 * 3)
         if not self.start_entry.get():
             self.start_entry.set(start.strftime("%Y-%m-%d"))
         if not self.end_entry.get():
@@ -205,7 +226,22 @@ class BacktestPage(BasePage):
     # ---------------------------------------------------------- 运行
 
     def _selected_symbols(self) -> list:
-        return [symbol for symbol, var in self._symbol_vars.items() if var.get()]
+        symbols = [symbol for symbol, var in self._symbol_vars.items() if var.get()]
+        raw = ""
+        try:
+            raw = self.extra_entry.get() if hasattr(self, "extra_entry") else ""
+        except Exception:  # noqa: BLE001
+            raw = ""
+        for token in re.split(r"[,，\s]+", (raw or "").strip()):
+            if not token:
+                continue
+            try:
+                symbol = validate_symbol(normalize_symbol(token.upper()))
+            except Exception as exc:  # noqa: BLE001
+                raise ValueError("代码「%s」无效：%s" % (token, exc))
+            if symbol not in symbols:
+                symbols.append(symbol)
+        return symbols
 
     def _parse_date(self, text: str, label: str):
         try:
@@ -215,12 +251,28 @@ class BacktestPage(BasePage):
 
     def _start(self) -> None:
         service = self.c.services.backtest
+        self._error_reported = False
         if service.is_running():
             self.toast("回测正在运行，可先取消", "warning")
             return
-        symbols = self._selected_symbols()
+        try:
+            symbols = self._selected_symbols()
+        except ValueError as exc:
+            self.error("代码有误", str(exc))
+            return
         if not symbols:
             self.toast("至少选择一个标的", "warning")
+            return
+        sparse = []
+        for symbol in symbols:
+            cov = self.c.repos.bars.coverage(symbol, "1d")
+            if not cov or cov[0] < 2:
+                sparse.append(symbol)
+        if sparse:
+            self.error(
+                "标的缺少历史 K 线",
+                "以下标的在本地不足 2 根日线：%s\n请先到「数据中心」同步它们的全部历史。"
+                % "、".join(sparse[:6]))
             return
         try:
             start = self._parse_date(self.start_entry.get(), "开始日期")
@@ -273,13 +325,22 @@ class BacktestPage(BasePage):
         if service.last_error:
             self.run_status.configure(text="失败：%s" % service.last_error,
                                       fg=theme.color("danger"))
+            if not self._error_reported:
+                self._error_reported = True
+                self.toast("回测失败：%s" % str(service.last_error)[:80], "error")
             return
         result = service.latest_result()
         if result is not None:
-            self.run_status.configure(
-                text="完成：%d 笔交易，用时 %.2fs" % (len(result.trades),
-                                                   result.duration_sec),
-                fg=theme.color("success"))
+            count = int((result.metrics or {}).get("trade_count", 0) or 0)
+            if count == 0:
+                self.run_status.configure(
+                    text="完成，但没有产生交易：区间可能太短，或策略条件太严。",
+                    fg=theme.color("warning"))
+            else:
+                self.run_status.configure(
+                    text="完成：%d 笔交易，用时 %.2fs" % (len(result.trades),
+                                                       result.duration_sec),
+                    fg=theme.color("success"))
             self._show_result(result)
             self.shell.refresh_status()
 
